@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>车队招募收集站</title>
+    <style>
+        /* 整体页面美化 */
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: #e0e0e0; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+        .container { background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(10px); border-radius: 20px; padding: 40px; max-width: 500px; width: 100%; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); border: 1px solid rgba(255, 255, 255, 0.1); }
+        h2 { text-align: center; color: #00d4ff; margin-top: 0; text-shadow: 0 0 10px rgba(0, 212, 255, 0.5); }
+        label { display: block; margin-top: 15px; margin-bottom: 5px; font-weight: bold; color: #a0a0c0; }
+        input[type="text"], input[type="url"], select, textarea {
+            width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #333; 
+            background: rgba(0, 0, 0, 0.3); color: #fff; font-size: 16px; 
+            box-sizing: border-box; transition: all 0.3s;
+        }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #00d4ff; box-shadow: 0 0 15px rgba(0, 212, 255, 0.2); }
+        button { width: 100%; padding: 15px; margin-top: 25px; border: none; border-radius: 10px; background: linear-gradient(90deg, #00d4ff, #0088cc); color: white; font-size: 18px; font-weight: bold; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+        button:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(0, 212, 255, 0.4); }
+        .hidden { display: none; }
+        .result-box { margin-top: 20px; padding: 20px; background: rgba(0, 0, 0, 0.5); border-radius: 10px; word-break: break-all; white-space: pre-wrap; font-family: monospace; max-height: 300px; overflow-y: auto; }
+        .tip { font-size: 12px; color: #888; margin-top: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🚀 车队情报收集</h2>
+        
+        <!-- 表单开始 -->
+        <form id="recruitForm">
+            
+            <!-- Q1: 车头还是搭车 -->
+            <label>1. 你的定位：</label>
+            <select id="role" required onchange="toggleCheTouOptions()">
+                <option value="">--请选择--</option>
+                <option value="车头">当车头（带队）</option>
+                <option value="搭车">搭车（跟队）</option>
+            </select>
+
+            <!-- Q2: 仙墟几阶 (仅车头可见) -->
+            <div id="cheTouOptions" class="hidden">
+                <label>2. 仙墟可以打几阶？（请填写）</label>
+                <input type="text" id="xianxuLevel" placeholder="例如：最高能打3阶，稳定1阶">
+                
+                <label>3. 请选择你的车友：</label>
+                <input type="text" id="cheyou" placeholder="输入队友ID，多个请用逗号隔开">
+            </div>
+
+            <!-- Q3: 通用收集链接 -->
+            <label>4. 请粘贴你的相关链接：</label>
+            <input type="url" id="link" placeholder="https://..." required>
+            <div class="tip">可以是攻略链接、录像链接或个人主页</div>
+
+            <!-- Q4: 备注 -->
+            <label>5. 备注（可选）：</label>
+            <textarea id="remark" rows="3" placeholder="有什么想补充的可以说在这里..."></textarea>
+
+            <button type="submit">提交情报</button>
+        </form>
+
+        <!-- 提交后的结果显示 -->
+        <div id="resultArea" class="hidden">
+            <h2>✅ 提交成功！</h2>
+            <p>请复制以下内容发给管理员，或自行保存：</p>
+            <div id="resultData" class="result-box"></div>
+            <button onclick="location.reload()">返回继续填写</button>
+        </div>
+    </div>
+
+    <script>
+        // 切换车头选项的显示/隐藏
+        function toggleCheTouOptions() {
+            const role = document.getElementById('role').value;
+            const cheTouDiv = document.getElementById('cheTouOptions');
+            if (role === '车头') {
+                cheTouDiv.classList.remove('hidden');
+            } else {
+                cheTouDiv.classList.add('hidden');
+            }
+        }
+
+        // 处理表单提交
+        document.getElementById('recruitForm').addEventListener('submit', function(e) {
+            e.preventDefault(); // 阻止页面刷新
+
+            const role = document.getElementById('role').value;
+            const link = document.getElementById('link').value;
+            const remark = document.getElementById('remark').value;
+            
+            let resultText = `====== 情报简报 ======\n`;
+            resultText += `定位：${role}\n`;
+            
+            if (role === '车头') {
+                const xianxu = document.getElementById('xianxuLevel').value;
+                const cheyou = document.getElementById('cheyou').value;
+                resultText += `仙墟阶数：${xianxu}\n`;
+                resultText += `车友名单：${cheyou}\n`;
+            }
+            
+            resultText += `相关链接：${link}\n`;
+            resultText += `备注：${remark}\n`;
+            resultText += `=====================`;
+
+            // 显示结果区域，隐藏表单
+            document.getElementById('resultData').textContent = resultText;
+            document.getElementById('recruitForm').classList.add('hidden');
+            document.getElementById('resultArea').classList.remove('hidden');
+
+            // 进阶：如果你想自动保存到Google表格或飞书，代码要加在这里
+            // console.log(resultText); // 在控制台打印，方便调试
+        });
+    </script>
+</body>
+</html>
